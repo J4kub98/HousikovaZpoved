@@ -45,7 +45,7 @@ import nl.dionsegijn.konfetti.core.Position
 import nl.dionsegijn.konfetti.core.emitter.Emitter
 import java.util.concurrent.TimeUnit
 
-// --- Nový objekt pro držení designových prvků ---
+// --- Barevné schéma inspirované Apple designem ---
 object AppleTheme {
     val Blue = Color(0xFF007AFF)
     val Background = Color(0xFFF2F2F7)
@@ -58,6 +58,7 @@ object AppleTheme {
     val ButtonGray = Color(0xFFE5E5EA)
 }
 
+// --- Cesty pro navigaci ---
 object Routes {
     const val MENU = "menu"
     const val PLAYER_SETUP = "player_setup"
@@ -66,7 +67,7 @@ object Routes {
     const val SETTINGS = "settings"
 }
 
-// --- Navigace (beze změny v logice) ---
+// --- Hlavní navigační graf ---
 @Composable
 fun AppNavigation(
     gameViewModel: GameViewModel,
@@ -137,7 +138,6 @@ fun AppNavigation(
 
 // ===== OBRAZOVKY V NOVÉM DESIGNU =====
 
-// --- Hlavní Menu ---
 @Composable
 fun MenuScreen(onStartGameClick: () -> Unit, onSettingsClick: () -> Unit, hapticsEnabled: Boolean) {
     SetSystemBarColor(AppleTheme.Background)
@@ -173,7 +173,6 @@ fun MenuScreen(onStartGameClick: () -> Unit, onSettingsClick: () -> Unit, haptic
     }
 }
 
-// --- Nastavení Hráčů ---
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun PlayerSetupScreen(onStartGame: (List<String>) -> Unit, onBack: () -> Unit, hapticsEnabled: Boolean) {
@@ -244,7 +243,6 @@ fun PlayerSetupScreen(onStartGame: (List<String>) -> Unit, onBack: () -> Unit, h
     }
 }
 
-// --- Herní Obrazovka ---
 @Composable
 fun GameScreen(
     question: Question?,
@@ -326,8 +324,6 @@ fun GameScreen(
     }
 }
 
-
-// --- Obrazovka Konec Hry ---
 @Composable
 fun GameOverScreen(onPlayAgainClick: () -> Unit, onBackToMenuClick: () -> Unit, hapticsEnabled: Boolean) {
     SetSystemBarColor(AppleTheme.Background)
@@ -394,8 +390,6 @@ fun GameOverScreen(onPlayAgainClick: () -> Unit, onBackToMenuClick: () -> Unit, 
     }
 }
 
-
-// --- Obrazovka Nastavení ---
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun SettingsScreen(
