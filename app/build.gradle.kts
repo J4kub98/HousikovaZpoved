@@ -1,7 +1,8 @@
 plugins {
     id("com.android.application")
     id("org.jetbrains.kotlin.android")
-    kotlin("plugin.serialization") version "1.9.23"
+    // Takhle správně aplikujeme plugin, jehož verzi už řídí hlavní soubor
+    id("org.jetbrains.kotlin.plugin.serialization")
 }
 
 android {
