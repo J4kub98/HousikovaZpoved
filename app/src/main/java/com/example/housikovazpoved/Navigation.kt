@@ -1,4 +1,4 @@
-package com.example.housikovazpoved.ui.theme
+package com.example.housikovazpoved
 
 import android.app.Activity
 import androidx.compose.animation.*
@@ -18,11 +18,11 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.blur
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.geometry.Offset
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.Shadow
-import androidx.compose.ui.graphics.toArgb
+import androidx.compose.ui.graphics.*
 import androidx.compose.ui.hapticfeedback.HapticFeedback
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.platform.LocalHapticFeedback
@@ -36,7 +36,6 @@ import androidx.core.view.WindowCompat
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
-import com.example.housikovazpoved.*
 import nl.dionsegijn.konfetti.compose.KonfettiView
 import nl.dionsegijn.konfetti.compose.OnParticleSystemUpdateListener
 import nl.dionsegijn.konfetti.core.Party
@@ -46,19 +45,21 @@ import nl.dionsegijn.konfetti.core.emitter.Emitter
 import java.util.concurrent.TimeUnit
 
 // --- Barevné schéma inspirované Apple designem ---
-object AppleTheme {
-    val Blue = Color(0xFF007AFF)
+object PremiumTheme {
+    val Blue = Color(0xFF0A84FF)
     val Background = Color(0xFFF2F2F7)
-    val SecondaryBackground = Color.White
-    val Label = Color.Black
-    val SecondaryLabel = Color(0x993C3C43) // Černá s 60% průhledností
-    val Separator = Color(0x33C6C6C8) // Šedá s 20% průhledností
-    val Red = Color(0xFFFF3B30)
-    val Green = Color(0xFF34C759)
-    val ButtonGray = Color(0xFFE5E5EA)
+    val CardBackground = Color(0xAAE8E8ED) // Poloprůhledná bílá pro "frosted glass" efekt
+    val LabelPrimary = Color(0xFF000000)
+    val LabelSecondary = Color(0x993C3C43)
+    val LabelTertiary = Color(0x4D3C3C43)
+    val Separator = Color(0x33C6C6C8)
+    val Red = Color(0xFFFF453A)
+    val Green = Color(0xFF32D74B)
+    val ButtonPrimaryText = Color.White
+    val ButtonSecondaryText = Color(0xFF0A84FF)
+    val ButtonSecondaryBackground = Color(0xFFE5E5EA)
 }
 
-// --- Cesty pro navigaci ---
 object Routes {
     const val MENU = "menu"
     const val PLAYER_SETUP = "player_setup"
@@ -67,12 +68,8 @@ object Routes {
     const val SETTINGS = "settings"
 }
 
-// --- Hlavní navigační graf ---
 @Composable
-fun AppNavigation(
-    gameViewModel: GameViewModel,
-    settingsViewModel: SettingsViewModel
-) {
+fun AppNavigation(gameViewModel: GameViewModel, settingsViewModel: SettingsViewModel) {
     val navController = rememberNavController()
     val gameUiState by gameViewModel.uiState.collectAsState()
     val settingsUiState by settingsViewModel.uiState.collectAsState()
@@ -135,41 +132,37 @@ fun AppNavigation(
     }
 }
 
-
-// ===== OBRAZOVKY V NOVÉM DESIGNU =====
+// ===== OBRAZOVKY V PRÉMIOVÉM DESIGNU =====
 
 @Composable
 fun MenuScreen(onStartGameClick: () -> Unit, onSettingsClick: () -> Unit, hapticsEnabled: Boolean) {
-    SetSystemBarColor(AppleTheme.Background)
+    SetSystemBarColor(PremiumTheme.Background)
     Column(
-        modifier = Modifier.fillMaxSize().background(AppleTheme.Background).padding(32.dp),
+        modifier = Modifier.fillMaxSize().background(PremiumTheme.Background).padding(32.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center
     ) {
         Spacer(modifier = Modifier.weight(1f))
         Text(
             text = "Housíkova\nzpověď",
-            color = AppleTheme.Label,
-            fontSize = 40.sp,
+            color = PremiumTheme.LabelPrimary,
+            fontSize = 44.sp,
             fontWeight = FontWeight.Bold,
             textAlign = TextAlign.Center,
-            lineHeight = 48.sp
+            lineHeight = 52.sp,
+            style = TextStyle(
+                shadow = Shadow(
+                    color = Color.Black.copy(alpha = 0.1f),
+                    offset = Offset(0f, 2f),
+                    blurRadius = 4f
+                )
+            )
         )
         Spacer(modifier = Modifier.weight(1f))
-        StyledButton(
-            onClick = onStartGameClick,
-            text = "Hrát",
-            hapticsEnabled = hapticsEnabled,
-            isPrimary = true
-        )
+        PremiumButton(onClick = onStartGameClick, text = "Hrát", hapticsEnabled = hapticsEnabled)
         Spacer(modifier = Modifier.height(16.dp))
-        StyledButton(
-            onClick = onSettingsClick,
-            text = "Nastavení",
-            hapticsEnabled = hapticsEnabled,
-            isPrimary = false
-        )
-        Spacer(modifier = Modifier.height(20.dp))
+        PremiumButton(onClick = onSettingsClick, text = "Nastavení", hapticsEnabled = hapticsEnabled, isPrimary = false)
+        Spacer(modifier = Modifier.height(30.dp))
     }
 }
 
@@ -177,19 +170,19 @@ fun MenuScreen(onStartGameClick: () -> Unit, onSettingsClick: () -> Unit, haptic
 @Composable
 fun PlayerSetupScreen(onStartGame: (List<String>) -> Unit, onBack: () -> Unit, hapticsEnabled: Boolean) {
     var players by remember { mutableStateOf(listOf("")) }
-    SetSystemBarColor(AppleTheme.Background)
+    SetSystemBarColor(PremiumTheme.Background)
 
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("Kdo bude hrát?", fontWeight = FontWeight.Bold) },
+                title = { Text("Kdo bude hrát?", fontWeight = FontWeight.Bold, fontSize = 22.sp) },
                 navigationIcon = {
                     IconButton(onClick = onBack) { Icon(Icons.AutoMirrored.Filled.ArrowBack, "Zpět") }
                 },
-                colors = TopAppBarDefaults.topAppBarColors(containerColor = AppleTheme.Background)
+                colors = TopAppBarDefaults.topAppBarColors(containerColor = PremiumTheme.Background)
             )
         },
-        containerColor = AppleTheme.Background
+        containerColor = PremiumTheme.Background
     ) { padding ->
         Column(
             modifier = Modifier.fillMaxSize().padding(padding).padding(horizontal = 16.dp),
@@ -197,10 +190,7 @@ fun PlayerSetupScreen(onStartGame: (List<String>) -> Unit, onBack: () -> Unit, h
         ) {
             LazyColumn(modifier = Modifier.weight(1f)) {
                 itemsIndexed(players) { index, player ->
-                    Row(
-                        verticalAlignment = Alignment.CenterVertically,
-                        modifier = Modifier.padding(vertical = 4.dp).fillMaxWidth()
-                    ) {
+                    Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.padding(vertical = 4.dp).fillMaxWidth()) {
                         OutlinedTextField(
                             value = player,
                             onValueChange = { newValue -> players = players.toMutableList().also { it[index] = newValue } },
@@ -208,35 +198,31 @@ fun PlayerSetupScreen(onStartGame: (List<String>) -> Unit, onBack: () -> Unit, h
                             modifier = Modifier.weight(1f),
                             singleLine = true,
                             colors = TextFieldDefaults.colors(
-                                focusedIndicatorColor = AppleTheme.Blue,
+                                focusedIndicatorColor = PremiumTheme.Blue,
                                 unfocusedContainerColor = Color.Transparent,
                                 focusedContainerColor = Color.Transparent
                             )
                         )
                         if (players.size > 1) {
                             IconButton(onClick = { players = players.toMutableList().also { it.removeAt(index) } }) {
-                                Icon(Icons.Default.RemoveCircle, "Odebrat hráče", tint = AppleTheme.Red)
+                                Icon(Icons.Default.RemoveCircle, "Odebrat hráče", tint = PremiumTheme.Red)
                             }
                         }
                     }
                 }
                 item {
-                    TextButton(onClick = { players = players + "" }, modifier = Modifier.fillMaxWidth()) {
-                        Text("Přidat dalšího hráče", color = AppleTheme.Blue)
+                    TextButton(onClick = { players = players + "" }, modifier = Modifier.fillMaxWidth().padding(top = 8.dp)) {
+                        Text("Přidat dalšího hráče", color = PremiumTheme.Blue, fontWeight = FontWeight.SemiBold)
                     }
                 }
             }
-            TextButton(
-                onClick = { onStartGame(emptyList()) },
-                modifier = Modifier.padding(bottom = 8.dp)
-            ) {
-                Text("Pokračovat bez jmen", color = AppleTheme.Blue)
+            TextButton(onClick = { onStartGame(emptyList()) }, modifier = Modifier.padding(bottom = 8.dp)) {
+                Text("Pokračovat bez jmen", color = PremiumTheme.Blue)
             }
-            StyledButton(
+            PremiumButton(
                 onClick = { onStartGame(players.filter { it.isNotBlank() }) },
                 text = "Začít hru",
                 hapticsEnabled = hapticsEnabled,
-                isPrimary = true,
                 modifier = Modifier.padding(bottom = 24.dp)
             )
         }
@@ -245,47 +231,43 @@ fun PlayerSetupScreen(onStartGame: (List<String>) -> Unit, onBack: () -> Unit, h
 
 @Composable
 fun GameScreen(
-    question: Question?,
-    isLoading: Boolean,
-    canGoBack: Boolean,
-    currentPlayerName: String?,
-    hapticsEnabled: Boolean,
-    onNextQuestion: () -> Unit,
-    onPreviousQuestion: () -> Unit
+    question: Question?, isLoading: Boolean, canGoBack: Boolean, currentPlayerName: String?, hapticsEnabled: Boolean,
+    onNextQuestion: () -> Unit, onPreviousQuestion: () -> Unit
 ) {
     val haptic = LocalHapticFeedback.current
     val interactionSource = remember { MutableInteractionSource() }
-    SetSystemBarColor(AppleTheme.Background)
+    val beautifulGradient = Brush.verticalGradient(
+        colors = listOf(Color(0xFF8BC6EC), Color(0xFF9599E2))
+    )
+
+    SetSystemBarColor(Color(0xFF8BC6EC))
 
     Box(
-        modifier = Modifier
-            .fillMaxSize()
-            .background(AppleTheme.Background)
-            .clickable(
-                interactionSource = interactionSource,
-                indication = null
-            ) {
-                if (!isLoading) {
-                    performHaptic(haptic, HapticFeedbackType.TextHandleMove, hapticsEnabled)
-                    onNextQuestion()
-                }
-            },
+        modifier = Modifier.fillMaxSize().background(beautifulGradient).clickable(
+            interactionSource = interactionSource,
+            indication = null
+        ) {
+            if (!isLoading) {
+                performHaptic(haptic, HapticFeedbackType.TextHandleMove, hapticsEnabled)
+                onNextQuestion()
+            }
+        },
         contentAlignment = Alignment.Center
     ) {
+        // Efekt rozmazání pozadí za kartou
+        Box(modifier = Modifier.fillMaxSize().blur(radius = 16.dp))
+
         Column(
-            modifier = Modifier.fillMaxSize().padding(24.dp),
+            modifier = Modifier.fillMaxSize().padding(horizontal = 20.dp, vertical = 40.dp),
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.Center
         ) {
             Spacer(modifier = Modifier.weight(0.5f))
-            PlayerNameDisplay(
-                name = currentPlayerName,
-                isBonus = question?.isBonus == true
-            )
+            PlayerNameDisplay(name = currentPlayerName, isBonus = question?.isBonus == true)
             Spacer(modifier = Modifier.height(24.dp))
 
             if (isLoading) {
-                CircularProgressIndicator(color = AppleTheme.Blue)
+                CircularProgressIndicator(color = Color.White, strokeWidth = 3.dp)
             } else {
                 AnimatedQuestionCard(question = question)
             }
@@ -293,30 +275,26 @@ fun GameScreen(
             Spacer(modifier = Modifier.weight(1f))
             Text(
                 text = "Klepni kamkoliv pro další otázku",
-                color = AppleTheme.SecondaryLabel,
+                color = Color.White.copy(alpha = 0.7f),
                 fontSize = 14.sp,
+                fontWeight = FontWeight.SemiBold,
                 modifier = Modifier.padding(bottom = 16.dp)
             )
         }
 
         if (canGoBack && !isLoading) {
-            Surface(
-                modifier = Modifier
-                    .align(Alignment.TopStart)
-                    .padding(16.dp)
-                    .clip(CircleShape)
+            Box(
+                modifier = Modifier.align(Alignment.TopStart).padding(20.dp).clip(CircleShape)
+                    .background(PremiumTheme.CardBackground.copy(alpha = 0.5f))
                     .clickable {
                         performHaptic(haptic, HapticFeedbackType.LongPress, hapticsEnabled)
                         onPreviousQuestion()
-                    },
-                shape = CircleShape,
-                color = AppleTheme.Background.copy(alpha = 0.8f),
-                shadowElevation = 4.dp
+                    }
             ) {
                 Icon(
                     Icons.AutoMirrored.Filled.ArrowBack,
                     "Předchozí otázka",
-                    tint = AppleTheme.Blue,
+                    tint = PremiumTheme.LabelPrimary,
                     modifier = Modifier.padding(12.dp).size(24.dp)
                 )
             }
@@ -326,146 +304,100 @@ fun GameScreen(
 
 @Composable
 fun GameOverScreen(onPlayAgainClick: () -> Unit, onBackToMenuClick: () -> Unit, hapticsEnabled: Boolean) {
-    SetSystemBarColor(AppleTheme.Background)
+    SetSystemBarColor(PremiumTheme.Background)
     var showKonfetti by remember { mutableStateOf(true) }
 
     Box(modifier = Modifier.fillMaxSize()) {
         Column(
-            modifier = Modifier.fillMaxSize().background(AppleTheme.Background).padding(32.dp),
+            modifier = Modifier.fillMaxSize().background(PremiumTheme.Background).padding(32.dp),
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.Center
         ) {
             Spacer(modifier = Modifier.weight(1f))
             Text(
-                "Konec hry",
-                fontSize = 34.sp,
-                fontWeight = FontWeight.Bold,
-                color = AppleTheme.Label,
-                modifier = Modifier.padding(bottom = 16.dp)
+                "Konec hry", fontSize = 34.sp, fontWeight = FontWeight.Bold,
+                color = PremiumTheme.LabelPrimary, modifier = Modifier.padding(bottom = 16.dp)
             )
             Text(
-                "Všechny otázky byly zodpovězeny!",
-                fontSize = 18.sp,
-                color = AppleTheme.SecondaryLabel,
-                textAlign = TextAlign.Center,
-                lineHeight = 24.sp,
-                modifier = Modifier.padding(bottom = 40.dp)
+                "Všechny otázky byly zodpovězeny!", fontSize = 18.sp, color = PremiumTheme.LabelSecondary,
+                textAlign = TextAlign.Center, lineHeight = 24.sp, modifier = Modifier.padding(bottom = 40.dp)
             )
             Spacer(modifier = Modifier.weight(1f))
-            StyledButton(
-                onClick = onPlayAgainClick,
-                text = "Hrát znovu",
-                isPrimary = true,
-                hapticsEnabled = hapticsEnabled
-            )
+            PremiumButton(onClick = onPlayAgainClick, text = "Hrát znovu", hapticsEnabled = hapticsEnabled)
             Spacer(modifier = Modifier.height(16.dp))
-            StyledButton(
-                onClick = onBackToMenuClick,
-                text = "Zpět do menu",
-                isPrimary = false,
-                hapticsEnabled = hapticsEnabled
-            )
-            Spacer(modifier = Modifier.height(20.dp))
+            PremiumButton(onClick = onBackToMenuClick, text = "Zpět do menu", hapticsEnabled = hapticsEnabled, isPrimary = false)
+            Spacer(modifier = Modifier.height(30.dp))
         }
 
         if (showKonfetti) {
             val party = remember {
                 Party(
                     speed = 0f, maxSpeed = 30f, damping = 0.9f, spread = 360,
-                    colors = listOf(AppleTheme.Blue.toArgb(), AppleTheme.Red.toArgb(), AppleTheme.Green.toArgb(), 0xFFFFA500),
+                    colors = listOf(PremiumTheme.Blue.toArgb(), PremiumTheme.Red.toArgb(), PremiumTheme.Green.toArgb(), 0xFFFFA500.toInt()),
                     emitter = Emitter(duration = 100, TimeUnit.MILLISECONDS).max(100),
                     position = Position.Relative(0.5, 0.3)
                 )
             }
-            KonfettiView(
-                parties = listOf(party),
-                modifier = Modifier.fillMaxSize(),
-                updateListener = object : OnParticleSystemUpdateListener {
-                    override fun onParticleSystemEnded(system: PartySystem, activeSystems: Int) {
-                        if (activeSystems == 0) showKonfetti = false
-                    }
+            KonfettiView(parties = listOf(party), modifier = Modifier.fillMaxSize(), updateListener = object : OnParticleSystemUpdateListener {
+                override fun onParticleSystemEnded(system: PartySystem, activeSystems: Int) {
+                    if (activeSystems == 0) showKonfetti = false
                 }
-            )
+            })
         }
     }
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun SettingsScreen(
-    onBack: () -> Unit,
-    settingsState: SettingsState,
-    onToggleHaptics: (Boolean) -> Unit
-) {
-    SetSystemBarColor(AppleTheme.Background)
+fun SettingsScreen(onBack: () -> Unit, settingsState: SettingsState, onToggleHaptics: (Boolean) -> Unit) {
+    SetSystemBarColor(PremiumTheme.Background)
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("Nastavení", fontWeight = FontWeight.Bold) },
-                navigationIcon = {
-                    IconButton(onClick = onBack) { Icon(Icons.AutoMirrored.Filled.ArrowBack, "Zpět") }
-                },
-                colors = TopAppBarDefaults.topAppBarColors(containerColor = AppleTheme.Background)
+                title = { Text("Nastavení", fontWeight = FontWeight.Bold, fontSize = 22.sp) },
+                navigationIcon = { IconButton(onClick = onBack) { Icon(Icons.AutoMirrored.Filled.ArrowBack, "Zpět") } },
+                colors = TopAppBarDefaults.topAppBarColors(containerColor = PremiumTheme.Background)
             )
         },
-        containerColor = AppleTheme.Background
+        containerColor = PremiumTheme.Background
     ) { padding ->
         Column(modifier = Modifier.fillMaxSize().padding(padding)) {
-            Column(Modifier.padding(top = 16.dp).background(AppleTheme.SecondaryBackground)) {
+            Column(Modifier.padding(top = 24.dp, start = 16.dp, end = 16.dp).clip(RoundedCornerShape(12.dp)).background(PremiumTheme.SecondaryBackground)) {
                 Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .clickable { onToggleHaptics(!settingsState.hapticsEnabled) }
-                        .padding(horizontal = 16.dp, vertical = 12.dp),
+                    modifier = Modifier.fillMaxWidth().clickable { onToggleHaptics(!settingsState.hapticsEnabled) }.padding(horizontal = 16.dp, vertical = 14.dp),
                     verticalAlignment = Alignment.CenterVertically,
                     horizontalArrangement = Arrangement.SpaceBetween
                 ) {
-                    Text("Haptická odezva", style = MaterialTheme.typography.bodyLarge)
+                    Text("Haptická odezva", style = MaterialTheme.typography.bodyLarge, fontSize = 17.sp)
                     Switch(
                         checked = settingsState.hapticsEnabled,
                         onCheckedChange = onToggleHaptics,
                         colors = SwitchDefaults.colors(
                             checkedThumbColor = Color.White,
-                            checkedTrackColor = AppleTheme.Green
+                            checkedTrackColor = PremiumTheme.Green
                         )
                     )
                 }
-                Divider(color = AppleTheme.Separator, modifier = Modifier.padding(start = 16.dp))
+                Divider(color = PremiumTheme.Separator, modifier = Modifier.padding(start = 16.dp))
             }
         }
     }
 }
 
-
-// ===== PŘESTYLOVANÉ A POMOCNÉ KOMPONENTY =====
+// ===== PRÉMIOVÉ A POMOCNÉ KOMPONENTY =====
 
 @Composable
-fun StyledButton(
-    onClick: () -> Unit,
-    text: String,
-    hapticsEnabled: Boolean,
-    modifier: Modifier = Modifier,
-    isPrimary: Boolean = true
-) {
+fun PremiumButton(onClick: () -> Unit, text: String, hapticsEnabled: Boolean, modifier: Modifier = Modifier, isPrimary: Boolean = true) {
     val haptic = LocalHapticFeedback.current
     Button(
         onClick = {
             performHaptic(haptic, HapticFeedbackType.LongPress, hapticsEnabled)
             onClick()
         },
-        modifier = modifier.fillMaxWidth().height(50.dp),
-        shape = RoundedCornerShape(8.dp),
-        colors = if (isPrimary) {
-            ButtonDefaults.buttonColors(
-                containerColor = AppleTheme.Blue,
-                contentColor = Color.White
-            )
-        } else {
-            ButtonDefaults.buttonColors(
-                containerColor = AppleTheme.ButtonGray,
-                contentColor = AppleTheme.Blue
-            )
-        },
+        modifier = modifier.fillMaxWidth().height(52.dp),
+        shape = RoundedCornerShape(12.dp),
+        colors = if (isPrimary) ButtonDefaults.buttonColors(containerColor = PremiumTheme.Blue, contentColor = PremiumTheme.ButtonPrimaryText)
+        else ButtonDefaults.buttonColors(containerColor = PremiumTheme.ButtonSecondaryBackground, contentColor = PremiumTheme.ButtonSecondaryText),
         elevation = ButtonDefaults.buttonElevation(defaultElevation = 0.dp)
     ) {
         Text(text, fontSize = 17.sp, fontWeight = FontWeight.SemiBold)
@@ -484,15 +416,11 @@ fun PlayerNameDisplay(name: String?, isBonus: Boolean) {
         Text(
             text = textToShow ?: "",
             style = TextStyle(
-                fontSize = 28.sp,
+                fontSize = 30.sp,
                 fontWeight = FontWeight.Bold,
-                color = if (isBonus) AppleTheme.Red else AppleTheme.Label,
+                color = if (isBonus) Color(0xFFFFD700) else Color.White,
                 textAlign = TextAlign.Center,
-                shadow = Shadow(
-                    color = Color.Black.copy(alpha = 0.2f),
-                    offset = Offset(1f, 1f),
-                    blurRadius = 2f
-                )
+                shadow = Shadow(color = Color.Black.copy(alpha = 0.35f), offset = Offset(2f, 4f), blurRadius = 8f)
             ),
             modifier = Modifier.padding(bottom = 8.dp)
         )
@@ -502,14 +430,15 @@ fun PlayerNameDisplay(name: String?, isBonus: Boolean) {
 @OptIn(ExperimentalAnimationApi::class)
 @Composable
 fun AnimatedQuestionCard(question: Question?) {
+    val easing = CubicBezierEasing(0.16f, 1f, 0.3f, 1f) // plynulá a responzivní animace
     AnimatedContent(
         targetState = question,
         transitionSpec = {
-            val enter = slideInHorizontally(animationSpec = tween(durationMillis = 400, easing = EaseOut), initialOffsetX = { fullWidth -> -fullWidth }) + fadeIn()
-            val exit = slideOutHorizontally(animationSpec = tween(durationMillis = 400, easing = EaseIn), targetOffsetX = { fullWidth -> fullWidth }) + fadeOut()
+            val enter = slideInHorizontally(animationSpec = tween(600, easing = easing), initialOffsetX = { -it - 100 }) + fadeIn(tween(300))
+            val exit = slideOutHorizontally(animationSpec = tween(600, easing = easing), targetOffsetX = { it + 100 }) + fadeOut(tween(300))
             enter togetherWith exit using SizeTransform(clip = false)
         },
-        label = "QuestionTransition"
+        label = "PremiumQuestionTransition"
     ) { targetQuestion ->
         QuestionCard(question = targetQuestion)
     }
@@ -517,51 +446,49 @@ fun AnimatedQuestionCard(question: Question?) {
 
 @Composable
 fun QuestionCard(question: Question?) {
-    val cardBgColor = AppleTheme.SecondaryBackground
-    val textColor = if (question?.isBonus == true) AppleTheme.Red else AppleTheme.Label
-    val cardShape = remember { RoundedCornerShape(20.dp) }
+    val cardShape = remember { RoundedCornerShape(24.dp) }
+    val textColor = if (question?.isBonus == true) PremiumTheme.Red else PremiumTheme.LabelPrimary
 
     Card(
-        modifier = Modifier.widthIn(max = 340.dp).heightIn(min = 400.dp),
+        modifier = Modifier
+            .widthIn(max = 340.dp)
+            .heightIn(min = 420.dp)
+            .shadow(elevation = 16.dp, shape = cardShape, ambientColor = PremiumTheme.Blue.copy(alpha = 0.5f)),
         shape = cardShape,
-        colors = CardDefaults.cardColors(containerColor = cardBgColor),
-        elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
+        colors = CardDefaults.cardColors(containerColor = PremiumTheme.CardBackground),
+        elevation = CardDefaults.cardElevation(defaultElevation = 0.dp) // Stín řešíme přes Modifier.shadow
     ) {
         Box(
-            modifier = Modifier.fillMaxSize().padding(horizontal = 24.dp, vertical = 40.dp),
+            modifier = Modifier.fillMaxSize().padding(horizontal = 28.dp, vertical = 40.dp),
             contentAlignment = Alignment.Center
         ) {
             Text(
                 text = question?.text ?: "Načítání...",
                 textAlign = TextAlign.Center,
                 color = textColor,
-                fontSize = 24.sp,
+                fontSize = 26.sp,
                 fontWeight = FontWeight.Bold,
-                lineHeight = 32.sp
+                lineHeight = 34.sp
             )
         }
     }
 }
 
-
-// --- POMOCNÉ FUNKCE ---
 fun performHaptic(haptic: HapticFeedback, type: HapticFeedbackType, isEnabled: Boolean) {
-    if (isEnabled) {
-        haptic.performHapticFeedback(type)
-    }
+    if (isEnabled) haptic.performHapticFeedback(type)
 }
 
 @Composable
-private fun SetSystemBarColor(color: Color) {
+private fun SetSystemBarColor(color: Color, isLight: Boolean? = null) {
     val view = LocalView.current
-    val isLightColor = color.red * 0.299 + color.green * 0.587 + color.blue * 0.114 > 0.5
+    val useLightStatusBars = isLight ?: (color.red * 0.299 + color.green * 0.587 + color.blue * 0.114 > 0.5)
     if (!view.isInEditMode) {
         SideEffect {
             val window = (view.context as Activity).window
             window.statusBarColor = color.toArgb()
-            window.navigationBarColor = color.toArgb() // Sjednocení barvy i pro navigační lištu
-            WindowCompat.getInsetsController(window, view).isAppearanceLightStatusBars = isLightColor
-            WindowCompat.getInsetsController(window, view).isAppearanceLightNavigationBars = isLightColor
+            window.navigationBarColor = color.toArgb()
+            WindowCompat.getInsetsController(window, view).isAppearanceLightStatusBars = useLightStatusBars
+            WindowCompat.getInsetsController(window, view).isAppearanceLightNavigationBars = useLightStatusBars
         }
     }
 }

@@ -1,7 +1,6 @@
 plugins {
     id("com.android.application")
     id("org.jetbrains.kotlin.android")
-    // Takhle správně aplikujeme plugin, jehož verzi už řídí hlavní soubor
     id("org.jetbrains.kotlin.plugin.serialization")
 }
 
@@ -53,6 +52,7 @@ android {
 }
 
 dependencies {
+    // Používáme Compose Bill of Materials (BOM) pro správu verzí Compose knihoven
     val composeBom = platform("androidx.compose:compose-bom:2024.04.00")
     implementation(composeBom)
     androidTestImplementation(composeBom)
@@ -76,7 +76,7 @@ dependencies {
     // Ostatní knihovny
     implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.6.3")
     implementation("nl.dionsegijn:konfetti-compose:2.0.4")
-    implementation("androidx.datastore:datastore-preferences:1.1.1") // Knihovna pro nastavení
+    implementation("androidx.datastore:datastore-preferences:1.1.1")
 
     // Testovací závislosti
     testImplementation("junit:junit:4.13.2")
